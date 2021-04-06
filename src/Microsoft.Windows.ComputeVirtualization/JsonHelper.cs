@@ -4,7 +4,7 @@ using System.Runtime.Serialization.Json;
 
 namespace Microsoft.Windows.ComputeVirtualization
 {
-    internal class JsonHelper
+    public class JsonHelper
     {
         public static string ToJson<T>(T obj)
         {
