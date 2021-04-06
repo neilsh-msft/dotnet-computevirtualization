@@ -226,7 +226,7 @@ namespace Microsoft.Windows.ComputeVirtualization.Schema
 
     
     [DataContract]
-    struct HNSEndpointResponse
+    struct HNSSingleEndpointResponse
     {
         [DataMember(IsRequired = true)]
         public bool Success
@@ -244,6 +244,31 @@ namespace Microsoft.Windows.ComputeVirtualization.Schema
 
         [DataMember(EmitDefaultValue = false)]
         public HNSEndpoint Output
+        {
+            get;
+            set;
+        }
+    }
+
+    [DataContract]
+    struct HNSEndpointResponse
+    {
+        [DataMember(IsRequired = true)]
+        public bool Success
+        {
+            get;
+            set;
+        }
+
+        [DataMember(EmitDefaultValue = false)]
+        public string Error
+        {
+            get;
+            set;
+        }
+
+        [DataMember(EmitDefaultValue = false)]
+        public HNSEndpoint[] Output
         {
             get;
             set;

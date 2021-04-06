@@ -23,7 +23,8 @@ namespace Microsoft.Windows.ComputeVirtualization.Schema
         Transparent = 1,
         L2Bridge = 2,
         L2Tunnel = 3,
-        Private = 4,
+        ICS = 4,
+        Private = 5,
     }
 
 
@@ -376,7 +377,138 @@ namespace Microsoft.Windows.ComputeVirtualization.Schema
     }
 
 
-    [DataContract]
+[DataContract]
+    // ContainerProperties holds the properties for a container and the processes running in that container
+    public struct ContainerProperties
+    {
+        [DataMember]
+        public Guid Id
+        {
+            get;
+            set;
+        }
+
+        [DataMember]
+        public string Name
+        {
+            get;
+            set;
+        }
+
+        [DataMember]
+        public string State
+        {
+            get;
+            set;
+        }
+
+        [DataMember]
+        public string SystemType
+        {
+            get;
+            set;
+        }
+
+        [DataMember(EmitDefaultValue = false)]
+        public string RuntimeOsType //               string `json:"RuntimeOsType,omitempty"`
+        {
+            get;
+            set;
+        }
+
+        [DataMember]
+        public string Owner
+        {
+            get;
+            set;
+        }
+
+        [DataMember(EmitDefaultValue = false)]
+        public string SiloGUID //                    string                              `json:"SiloGuid,omitempty"`
+        {
+            get;
+            set;
+        }
+
+        [DataMember(EmitDefaultValue = false)]
+        public string RuntimeId // guid.GUID                           `json:"RuntimeId,omitempty"`
+        {
+            get;
+            set;
+        }
+
+        [DataMember(EmitDefaultValue = false)]
+        public string IsRuntimeTemplate //            bool                                `json:",omitempty"`
+        {
+            get;
+            set;
+        }
+
+        [DataMember(EmitDefaultValue = false)]
+        public string RuntimeImagePath //             string                              `json:",omitempty"`
+        {
+            get;
+            set;
+        }
+
+        [DataMember(EmitDefaultValue = false)]
+        public string Stopped //                     bool                                `json:",omitempty"`
+        {
+            get;
+            set;
+        }
+
+        [DataMember(EmitDefaultValue = false)]
+        public string ExitType //                    string                              `json:",omitempty"`
+        {
+            get;
+            set;
+        }
+
+        [DataMember(EmitDefaultValue = false)]
+        public string AreUpdatesPending //           bool                                `json:",omitempty"`
+        {
+            get;
+            set;
+        }
+
+        [DataMember(EmitDefaultValue = false)]
+        public string ObRoot  //                     string                              `json:",omitempty"`
+        {
+            get;
+            set;
+        }
+
+        [DataMember(EmitDefaultValue = false)]
+        public string Statistics  // Statistics //                         `json:",omitempty"`
+        {
+            get;
+            set;
+        }
+
+        [DataMember(EmitDefaultValue = false)]
+        public string ProcessList // [] ProcessListItem                   `json:",omitempty"`
+        {
+            get;
+            set;
+        }
+
+        [DataMember(EmitDefaultValue = false)]
+        public string MappedVirtualDiskControllers // map[int]MappedVirtualDiskController `json:",omitempty"`
+        {
+            get;
+            set;
+        }
+
+        [DataMember(EmitDefaultValue = false)]
+        public string GuestConnectionInfo // GuestConnectionInfo                 `json:",omitempty"`
+        {
+            get;
+            set;
+        }
+}
+
+[DataContract]
     struct NatPortBinding
     {
         [DataMember(Name = "Protocol")]
