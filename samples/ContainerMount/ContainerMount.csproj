@@ -1,8 +1,8 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <Description>ContainerMount Sample</Description>
-    <TargetFramework>net46</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <AssemblyName>ContainerMount</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageId>ContainerMount</PackageId>
@@ -16,14 +16,20 @@
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Microsoft.Windows.ComputeVirtualization\Microsoft.Windows.ComputeVirtualization.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
-
 </Project>
