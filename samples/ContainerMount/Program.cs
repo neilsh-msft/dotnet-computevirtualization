@@ -49,6 +49,7 @@ namespace ContainerMount
 
                             h.EnumerateComputeSystems(args[1], out computeSystems);
                             containers = JsonHelper.FromJson<ContainerProperties[]>(computeSystems);
+                            Console.Out.WriteLine(computeSystems);
 
                             foreach (ContainerProperties container in containers)
                             {
@@ -146,6 +147,86 @@ namespace ContainerMount
                             }
                         }
                         break;
+
+                    case "-createvm":
+                        {
+/*                            string request = @"
+{
+    ""SchemaVersion"": {""Major"": 2,""Minor"": 1},
+    ""Owner"": ""mariner"",
+    ""ShouldTerminateOnLastHandleClosed"": true,
+    ""VirtualMachine"": {
+        ""Chipset"": {
+            ""Uefi"": {
+                ""BootThis"": {
+                    ""DevicePath"": ""Primary disk"",
+                    ""DiskNumber"": 0,
+                    ""DeviceType"": ""ScsiDrive""
+                }
+            }
+        },
+        ""ComputeTopology"": {
+            ""Memory"": {
+                ""Backing"": ""Virtual"",
+                ""SizeInMB"": 2048
+            },
+            ""Processor"": {
+                ""Count"": 2
+            }
+        }
+    }
+}";
+*/
+
+                            string request = @"
+{
+    ""SchemaVersion"": {""Major"": 2,""Minor"": 1},
+    ""Owner"": ""mariner"",
+    ""ShouldTerminateOnLastHandleClosed"": false,
+    ""VirtualMachine"": {
+        ""Chipset"": {
+            ""Uefi"": {
+                ""BootThis"": {
+                    ""DevicePath"": ""Primary disk"",
+                    ""DiskNumber"": 0,
+                    ""DeviceType"": ""ScsiDrive""
+                }
+            }
+        },
+        ""ComputeTopology"": {
+            ""Memory"": {
+                ""Backing"": ""Virtual"",
+                ""SizeInMB"": 2048
+            },
+            ""Processor"": {
+                ""Count"": 2
+            }
+        },
+        ""Devices"": {
+            ""Scsi"": {
+                ""Primary disk"": {
+                    ""Attachments"": {
+                        ""0"": {
+                            ""Type"": ""VirtualDisk"",
+                            ""Path"": ""c:\\users\\neilsh\\Desktop\\mariner\\core-1.0.20210224.vhdx""
+                        }
+                    }
+                }
+            }
+        }
+    }
+}";
+
+                            IHcs h = HcsFactory.GetHcs();
+                            IntPtr identity = IntPtr.Zero;
+                            IntPtr computeSystem;
+
+                            h.CreateComputeSystem(id.ToString(), request, identity, out computeSystem);
+
+                            
+
+                        }
+                        break;
                 }
             }
             catch (Exception e)
@@ -155,3 +236,51 @@ namespace ContainerMount
         }
     }
 }
+
+
+/*
+ *                             string request2 = @"
+{
+    ""Owner"": ""mariner"",
+    ""SchemaVersion"": {""Major"": 2,""Minor"": 2},
+    ""VirtualMachine"": {
+        ""StopOnReset"": true,
+        ""Chipset"": {
+            ""UseUtc"": true,
+            ""LinuxKernelDirect"": {
+                ""KernelFilePath"": ""C:\\WINDOWS\\system32\\lxss\\tools\\kernel"",
+                ""InitRdPath"": ""C:\\WINDOWS\\system32\\lxss\\tools\\initrd.img"",
+                ""KernelCmdLine"": ""initrd=\\initrd.img panic=-1 pty.legacy_count=0 nr_cpus=16""
+            }
+        },
+        ""ComputeTopology"": {
+            ""Memory"": {
+                ""SizeInMB"": 26124,
+                ""AllowOvercommit"": true,
+                ""EnableColdDiscardHint"": true,
+                ""EnableDeferredCommit"": true
+            },
+            ""Processor"": {
+                ""Count"": 16
+            }
+        },
+        ""Devices"": {
+            ""Scsi"": {
+                ""0"": {
+                    ""Attachments"": { }
+                }
+            },
+            ""HvSocket"": {
+                ""HvSocketConfig"": {
+                    ""DefaultBindSecurityDescriptor"": ""D:P(A;;FA;;;SY)(A;;FA;;;S-1-12-1-3719691770-1285959622-2873335948-1678436016)"",
+                    ""DefaultConnectSecurityDescriptor"": ""D:P(A;;FA;;;SY)(A;;FA;;;S-1-12-1-3719691770-1285959622-2873335948-1678436016)""
+                }
+            },
+            ""Plan9"": { },
+            ""Battery"": { }
+        }
+    },
+    ""ShouldTerminateOnLastHandleClosed"": true
+}
+                        ";
+*/
