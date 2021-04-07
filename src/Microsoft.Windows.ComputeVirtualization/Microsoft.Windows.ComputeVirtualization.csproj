@@ -5,7 +5,8 @@
     <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
     <VersionPrefix>0.1.0-alpha5</VersionPrefix>
     <Authors>Microsoft</Authors>
-    <TargetFrameworks>net5.0;net48;netstandard1.3;netcoreapp2.0</TargetFrameworks>
+<!--    <TargetFrameworks>net5.0;net48;netstandard1.3;netcoreapp2.0</TargetFrameworks> -->
+    <TargetFrameworks>net5.0;netstandard1.3</TargetFrameworks>
     <DebugType>portable</DebugType>
     <AssemblyName>Microsoft.Windows.ComputeVirtualization</AssemblyName>
     <PackageId>Microsoft.Windows.ComputeVirtualization</PackageId>
