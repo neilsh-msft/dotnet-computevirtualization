@@ -11,6 +11,8 @@ namespace ContainerMount
             try
             {
                 var id = Guid.Parse("716025c3-441b-4ae5-a985-1b44fa698530");
+                HcsNotificationWatcher watcher;
+
                 Layer[] layers;
                 switch (args[0])
                 {
@@ -47,7 +49,7 @@ namespace ContainerMount
                             string computeSystems;
                             ContainerProperties[] containers;
 
-                            h.EnumerateComputeSystems(args[1], out computeSystems);
+                            h.EnumerateComputeSystems("{}", out computeSystems);
                             containers = JsonHelper.FromJson<ContainerProperties[]>(computeSystems);
                             Console.Out.WriteLine(computeSystems);
 
@@ -83,8 +85,93 @@ namespace ContainerMount
                             h.CloseComputeSystem(computeSystem);
 
                             container = HostComputeService.GetComputeSystem(args[1]);
+                        }
+                        break;
 
+                    case "-terminate":
+                        {
+                            IHcs h = HcsFactory.GetHcs();
+                            string computeSystems;
+                            string searchString = String.Format("{{\"Ids\":[\"{0}\"]}}", args[1]);
+                            IntPtr computeSystem;
 
+                            Console.Out.WriteLine(searchString);
+                            h.EnumerateComputeSystems(searchString, out computeSystems);
+                            Console.Out.WriteLine(computeSystems);
+                            h.OpenComputeSystem(args[1], out computeSystem);
+                            h.TerminateComputeSystem(computeSystem, null);
+                            h.CloseComputeSystem(computeSystem);
+                        }
+                        break;
+
+                    case "-start":
+                        {
+                            IHcs h = HcsFactory.GetHcs();
+                            string computeSystems;
+                            string searchString = String.Format("{{\"Ids\":[\"{0}\"]}}", args[1]);
+                            IntPtr computeSystem;
+
+                            Console.Out.WriteLine(searchString);
+                            h.EnumerateComputeSystems(searchString, out computeSystems);
+                            Console.Out.WriteLine(computeSystems);
+                            h.OpenComputeSystem(args[1], out computeSystem);
+                            watcher = new HcsNotificationWatcher(
+                                computeSystem,
+                                h.RegisterComputeSystemCallback,
+                                h.UnregisterComputeSystemCallback,
+                                new HCS_NOTIFICATIONS[]{
+                                    HCS_NOTIFICATIONS.HcsNotificationSystemExited,
+                                    HCS_NOTIFICATIONS.HcsNotificationSystemCreateCompleted,
+                                    HCS_NOTIFICATIONS.HcsNotificationSystemStartCompleted
+                                    }
+                                );
+
+                            h.StartComputeSystem(computeSystem, null);
+
+                            while (!watcher.WatchAsync(HCS_NOTIFICATIONS.HcsNotificationSystemStartCompleted).IsCompleted)
+                            {
+                                watcher.Wait(HCS_NOTIFICATIONS.HcsNotificationSystemCreateCompleted, 10);
+                                NotificationResult foo = watcher.WatchAsync(HCS_NOTIFICATIONS.HcsNotificationSystemStartCompleted).Result;
+                            }
+
+                            NotificationResult result = watcher.WatchAsync(HCS_NOTIFICATIONS.HcsNotificationSystemStartCompleted).Result;
+
+                            h.CloseComputeSystem(computeSystem);
+                        }
+                        break;
+
+                    case "-shutdown":
+                        {
+                            IHcs h = HcsFactory.GetHcs();
+                            string computeSystems;
+                            string searchString = String.Format("{{\"Ids\":[\"{0}\"]}}", args[1]);
+                            IntPtr computeSystem;
+
+                            Console.Out.WriteLine(searchString);
+                            h.EnumerateComputeSystems(searchString, out computeSystems);
+                            Console.Out.WriteLine(computeSystems);
+                            h.OpenComputeSystem(args[1], out computeSystem);
+                            watcher = new HcsNotificationWatcher(
+                                computeSystem,
+                                h.RegisterComputeSystemCallback,
+                                h.UnregisterComputeSystemCallback,
+                                new HCS_NOTIFICATIONS[]{
+                                    HCS_NOTIFICATIONS.HcsNotificationSystemExited,
+                                    HCS_NOTIFICATIONS.HcsNotificationSystemShutdownCompleted,
+                                    }
+                                );
+
+                            h.ShutdownComputeSystem(computeSystem, null);
+
+                            while (!watcher.WatchAsync(HCS_NOTIFICATIONS.HcsNotificationSystemShutdownCompleted).IsCompleted)
+                            {
+                                watcher.Wait(HCS_NOTIFICATIONS.HcsNotificationSystemShutdownCompleted, 10);
+                                NotificationResult foo = watcher.WatchAsync(HCS_NOTIFICATIONS.HcsNotificationSystemShutdownCompleted).Result;
+                            }
+
+                            NotificationResult result = watcher.WatchAsync(HCS_NOTIFICATIONS.HcsNotificationSystemShutdownCompleted).Result;
+
+                            h.CloseComputeSystem(computeSystem);
                         }
                         break;
 
@@ -148,36 +235,27 @@ namespace ContainerMount
                         }
                         break;
 
+                    case "-createendpoint":
+                        {
+                            /*
+                             * IHns h = HnsFactory.GetHns();
+                            */
+                            string request = @"{""VirtualNetwork"": """ + args[1] + @"""}";
+
+                            HNSEndpoint endpoint = HostNetworkingService.HNSEndpointRequest("POST", "", request);
+
+                            Console.Out.WriteLine("Id: " + endpoint.ID);
+                            Console.Out.WriteLine("Name: " + endpoint.Name);
+                            Console.Out.WriteLine("IPAddress: " + endpoint.IPAddress);
+                            Console.Out.WriteLine("MacAddress: " + endpoint.MacAddress);
+                            Console.Out.WriteLine("VirtualNetworkName: " + endpoint.VirtualNetworkName);
+                            Console.Out.WriteLine();
+                        }
+                        break;
+
+
                     case "-createvm":
                         {
-/*                            string request = @"
-{
-    ""SchemaVersion"": {""Major"": 2,""Minor"": 1},
-    ""Owner"": ""mariner"",
-    ""ShouldTerminateOnLastHandleClosed"": true,
-    ""VirtualMachine"": {
-        ""Chipset"": {
-            ""Uefi"": {
-                ""BootThis"": {
-                    ""DevicePath"": ""Primary disk"",
-                    ""DiskNumber"": 0,
-                    ""DeviceType"": ""ScsiDrive""
-                }
-            }
-        },
-        ""ComputeTopology"": {
-            ""Memory"": {
-                ""Backing"": ""Virtual"",
-                ""SizeInMB"": 2048
-            },
-            ""Processor"": {
-                ""Count"": 2
-            }
-        }
-    }
-}";
-*/
-
                             string request = @"
 {
     ""SchemaVersion"": {""Major"": 2,""Minor"": 1},
@@ -208,7 +286,7 @@ namespace ContainerMount
                     ""Attachments"": {
                         ""0"": {
                             ""Type"": ""VirtualDisk"",
-                            ""Path"": ""c:\\users\\neilsh\\Desktop\\mariner\\core-1.0.20210224.vhdx""
+                            ""Path"": ""c:\\hyperv\\core-1.0.20210224.vhdx""
                         }
                     }
                 }
@@ -220,12 +298,29 @@ namespace ContainerMount
                             IHcs h = HcsFactory.GetHcs();
                             IntPtr identity = IntPtr.Zero;
                             IntPtr computeSystem;
+                            string properties;
 
                             h.CreateComputeSystem(id.ToString(), request, identity, out computeSystem);
+                            watcher = new HcsNotificationWatcher(
+                                computeSystem,
+                                h.RegisterComputeSystemCallback,
+                                h.UnregisterComputeSystemCallback,
+                                new HCS_NOTIFICATIONS[]{
+                                    HCS_NOTIFICATIONS.HcsNotificationSystemExited,
+                                    HCS_NOTIFICATIONS.HcsNotificationSystemCreateCompleted,
+                                    HCS_NOTIFICATIONS.HcsNotificationSystemStartCompleted
+                                    }
+                                );
 
-                            
+                            watcher.Wait(HCS_NOTIFICATIONS.HcsNotificationSystemCreateCompleted);
 
+                            h.GetComputeSystemProperties(computeSystem, "{}", out properties);
+                            Console.Out.WriteLine(properties);
                         }
+                        break;
+
+                    default:
+                        Console.Out.WriteLine("Unknown command");
                         break;
                 }
             }
