@@ -290,6 +290,11 @@ namespace ContainerMount
                         }
                     }
                 }
+            },
+            ""NetworkAdapters"": {
+                ""Primary network"": {
+                    ""EndpointId"": ""7a2cfe06-7576-4f8b-bec6-8d2bc4b9790e""
+                }
             }
         }
     }
