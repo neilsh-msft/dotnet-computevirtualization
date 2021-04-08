@@ -309,7 +309,8 @@ namespace ContainerMount
                     ""DevicePath"": ""Primary disk"",
                     ""DiskNumber"": 0,
                     ""DeviceType"": ""ScsiDrive""
-                }
+                },
+                ""Console"": ""ComPort1""
             }
         },
         ""ComputeTopology"": {
@@ -337,6 +338,12 @@ namespace ContainerMount
                     ""EndpointId"": """;
                             string request_end = 
 @"""
+                }
+            },
+            ""ComPorts"": {
+                ""1"" : {
+                    ""NamedPipe"": ""\\\\.\\pipe\\vmpipe"",
+                    ""OptimizeForDebugger"": false
                 }
             }
         }
