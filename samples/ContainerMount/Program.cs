@@ -70,7 +70,6 @@ namespace ContainerMount
                         {
                             IHcs h = HcsFactory.GetHcs();
                             string computeSystems;
-                            ContainerProperties[] containers;
                             string searchString = String.Format("{{\"Ids\":[\"{0}\"]}}", args[1]);
                             IntPtr computeSystem;
                             string properties;
@@ -196,7 +195,18 @@ namespace ContainerMount
                         }
                         break;
 
-                    case "-createnetwork":
+                    case "-networks-raw":
+                        {
+                            IHns h = HnsFactory.GetHns();
+                            string result;
+
+                            h.Call("GET", "/networks", "", out result);
+
+                            Console.Out.WriteLine(result);
+                        }
+                        break;
+
+                    case "-create-network":
                         {
                             // New-HnsNetwork -Type ICS -JsonString '{"Name": "SuperHappyFunNetwork","Type": "ICS","Flags": 9}'
                             //    string request = @"{""Name"": ""SuperHappyFunNetwork"",""Flags"":""9"",""IsolateSwitch"":""True"",""Type"":""ICS""}";
@@ -212,6 +222,17 @@ namespace ContainerMount
 
                         }
                         break;
+
+                    case "-delete-network":
+                        {
+                            IHns hns = HnsFactory.GetHns();
+                            string result;
+
+                            hns.Call("DELETE", "/networks/" + args[1], "", out result);
+                            Console.Out.WriteLine(result);
+                        }
+                        break;
+
 
                     case "-endpoints":
                         {
@@ -235,7 +256,18 @@ namespace ContainerMount
                         }
                         break;
 
-                    case "-createendpoint":
+                    case "-endpoints-raw":
+                        {
+                            IHns h = HnsFactory.GetHns();
+                            string result;
+
+                            h.Call("GET", "/endpoints", "", out result);
+
+                            Console.Out.WriteLine(result);
+                        }
+                        break;
+
+                    case "-create-endpoint":
                         {
                             /*
                              * IHns h = HnsFactory.GetHns();
@@ -253,10 +285,19 @@ namespace ContainerMount
                         }
                         break;
 
+                    case "-delete-endpoint":
+                        {
+                            IHns hns = HnsFactory.GetHns();
+                            string result;
+
+                            hns.Call("DELETE", "/endpoints/" + args[1], "", out result);
+                            Console.Out.WriteLine(result);
+                        }
+                        break;
 
                     case "-createvm":
                         {
-                            string request = @"
+                            string request_start = @"
 {
     ""SchemaVersion"": {""Major"": 2,""Minor"": 1},
     ""Owner"": ""mariner"",
@@ -293,7 +334,9 @@ namespace ContainerMount
             },
             ""NetworkAdapters"": {
                 ""Primary network"": {
-                    ""EndpointId"": ""7a2cfe06-7576-4f8b-bec6-8d2bc4b9790e""
+                    ""EndpointId"": """;
+                            string request_end = 
+@"""
                 }
             }
         }
@@ -304,8 +347,8 @@ namespace ContainerMount
                             IntPtr identity = IntPtr.Zero;
                             IntPtr computeSystem;
                             string properties;
-
-                            h.CreateComputeSystem(id.ToString(), request, identity, out computeSystem);
+                            // assumes args[1] is endpoint id
+                            h.CreateComputeSystem(id.ToString(), request_start + args[1] + request_end, identity, out computeSystem);
                             watcher = new HcsNotificationWatcher(
                                 computeSystem,
                                 h.RegisterComputeSystemCallback,
