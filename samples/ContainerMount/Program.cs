@@ -341,7 +341,7 @@ namespace ContainerMount
                 }
             },
             ""ComPorts"": {
-                ""1"" : {
+                ""0"" : {
                     ""NamedPipe"": ""\\\\.\\pipe\\vmpipe"",
                     ""OptimizeForDebugger"": false
                 }
@@ -374,6 +374,87 @@ namespace ContainerMount
                         }
                         break;
 
+                    case "-createwsl":
+                        {
+                            string request = @"
+{
+    ""Owner"": ""WSL"",
+    ""SchemaVersion"": { ""Major"": 2,""Minor"": 2},
+    ""VirtualMachine"": {
+        ""StopOnReset"": true,
+        ""Chipset"": {
+            ""UseUtc"": true,
+            ""LinuxKernelDirect"": {
+                ""KernelFilePath"": ""C:\\WINDOWS\\system32\\lxss\\tools\\kernel"",
+                ""InitRdPath"": ""C:\\WINDOWS\\system32\\lxss\\tools\\initrd.img"",
+                ""KernelCmdLine"": ""earlycon=uart8250,mmio32,0x68A10000 console=ttyS0 initrd=\\initrd.img panic=-1 pty.legacy_count=0 nr_cpus=2""
+            }
+        },
+        ""ComputeTopology"": {
+            ""Memory"": {
+            ""SizeInMB"": 26124,
+            ""AllowOvercommit"": true,
+            ""EnableColdDiscardHint"": true,
+            ""EnableDeferredCommit"": true
+            },
+            ""Processor"": {
+                ""Count"": 2
+            }
+        },
+        ""Devices"": {
+            ""Scsi"": {
+                ""0"": {
+                    ""Attachments"": { }
+                }
+            },
+            ""Plan9"": { },
+            ""Battery"": { },
+            ""ComPorts"": {
+                ""0"" : {
+                    ""NamedPipe"": ""\\\\.\\pipe\\vmfoo"",
+                    ""OptimizeForDebugger"": false
+                }
+            }
+
+        }
+    },
+    ""ShouldTerminateOnLastHandleClosed"": false
+}";
+
+/*
+            ""HvSocket"": {
+                ""HvSocketConfig"": {
+                    ""DefaultBindSecurityDescriptor"": ""D: P(A; ; FA; ; ; SY)(A; ; FA; ; ; S - 1 - 12 - 1 - 3719691770 - 1285959622 - 2873335948 - 1678436016)"",
+                    ""DefaultConnectSecurityDescriptor"": ""D: P(A; ; FA; ; ; SY)(A; ; FA; ; ; S - 1 - 12 - 1 - 3719691770 - 1285959622 - 2873335948 - 1678436016)""
+                }
+            },
+
+*/
+
+                            IHcs h = HcsFactory.GetHcs();
+                            IntPtr identity = IntPtr.Zero;
+                            IntPtr computeSystem;
+                            string properties;
+
+                            h.CreateComputeSystem(id.ToString(), request, identity, out computeSystem);
+                            watcher = new HcsNotificationWatcher(
+                                computeSystem,
+                                h.RegisterComputeSystemCallback,
+                                h.UnregisterComputeSystemCallback,
+                                new HCS_NOTIFICATIONS[]{
+                                    HCS_NOTIFICATIONS.HcsNotificationSystemExited,
+                                    HCS_NOTIFICATIONS.HcsNotificationSystemCreateCompleted,
+                                    HCS_NOTIFICATIONS.HcsNotificationSystemStartCompleted
+                                    }
+                                );
+
+                            watcher.Wait(HCS_NOTIFICATIONS.HcsNotificationSystemCreateCompleted);
+
+                            h.GetComputeSystemProperties(computeSystem, "{}", out properties);
+                            Console.Out.WriteLine(properties);
+                        }
+                        break;
+
                     default:
                         Console.Out.WriteLine("Unknown command");
                         break;
@@ -386,51 +467,3 @@ namespace ContainerMount
         }
     }
 }
-
-
-/*
- *                             string request2 = @"
-{
-    ""Owner"": ""mariner"",
-    ""SchemaVersion"": {""Major"": 2,""Minor"": 2},
-    ""VirtualMachine"": {
-        ""StopOnReset"": true,
-        ""Chipset"": {
-            ""UseUtc"": true,
-            ""LinuxKernelDirect"": {
-                ""KernelFilePath"": ""C:\\WINDOWS\\system32\\lxss\\tools\\kernel"",
-                ""InitRdPath"": ""C:\\WINDOWS\\system32\\lxss\\tools\\initrd.img"",
-                ""KernelCmdLine"": ""initrd=\\initrd.img panic=-1 pty.legacy_count=0 nr_cpus=16""
-            }
-        },
-        ""ComputeTopology"": {
-            ""Memory"": {
-                ""SizeInMB"": 26124,
-                ""AllowOvercommit"": true,
-                ""EnableColdDiscardHint"": true,
-                ""EnableDeferredCommit"": true
-            },
-            ""Processor"": {
-                ""Count"": 16
-            }
-        },
-        ""Devices"": {
-            ""Scsi"": {
-                ""0"": {
-                    ""Attachments"": { }
-                }
-            },
-            ""HvSocket"": {
-                ""HvSocketConfig"": {
-                    ""DefaultBindSecurityDescriptor"": ""D:P(A;;FA;;;SY)(A;;FA;;;S-1-12-1-3719691770-1285959622-2873335948-1678436016)"",
-                    ""DefaultConnectSecurityDescriptor"": ""D:P(A;;FA;;;SY)(A;;FA;;;S-1-12-1-3719691770-1285959622-2873335948-1678436016)""
-                }
-            },
-            ""Plan9"": { },
-            ""Battery"": { }
-        }
-    },
-    ""ShouldTerminateOnLastHandleClosed"": true
-}
-                        ";
-*/
