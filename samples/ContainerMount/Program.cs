@@ -327,8 +327,13 @@ namespace ContainerMount
                 ""Primary disk"": {
                     ""Attachments"": {
                         ""0"": {
-                            ""Type"": ""VirtualDisk"",
-                            ""Path"": ""c:\\hyperv\\core-1.0.20210224.vhdx""
+                            ""Type"": ""VirtualDisk""," +
+#if true
+                            @"""Path"": ""c:\\hyperv\\core-1.0.20210408.vhdx""" +
+#else
+                            @"""Path"": ""c:\\hyperv\\core-1.0.20210224.vhdx""" +
+#endif
+@"
                         }
                     }
                 }
@@ -336,13 +341,17 @@ namespace ContainerMount
             ""NetworkAdapters"": {
                 ""Primary network"": {
                     ""EndpointId"": """;
-                            string request_end = 
+                            string request_end =
 @"""
                 }
             },
             ""ComPorts"": {
                 ""0"" : {
                     ""NamedPipe"": ""\\\\.\\pipe\\vmpipe"",
+                    ""OptimizeForDebugger"": false
+                },
+                ""1"" : {
+                    ""NamedPipe"": ""\\\\.\\pipe\\vmpipe1"",
                     ""OptimizeForDebugger"": false
                 }
             }
@@ -384,22 +393,39 @@ namespace ContainerMount
         ""StopOnReset"": true,
         ""Chipset"": {
             ""UseUtc"": true," +
-#if true
+#if false
             @"""LinuxKernelDirect"": {
                 ""KernelFilePath"": ""C:\\WINDOWS\\system32\\lxss\\tools\\kernel"",
                 ""InitRdPath"": ""C:\\WINDOWS\\system32\\lxss\\tools\\initrd.img"",
-                ""KernelCmdLine"": ""earlycon=uart8250,mmio32,0x68A10000 console=ttyS0 initrd=\\initrd.img panic=-1 pty.legacy_count=0 nr_cpus=2""
+                ""KernelCmdLine"": ""earlyprintk=ttyS0 earlycon=uart8250,mmio32,0x68A10000 console=ttyS0 initrd=\\initrd.img panic=-1 pty.legacy_count=0 nr_cpus=2""
+            }" +
+#elif false
+            @"""LinuxKernelDirect"": {
+                ""KernelFilePath"": ""C:\\WINDOWS\\system32\\lxss\\tools\\kernel"",
+                ""InitRdPath"": ""C:\\WINDOWS\\system32\\lxss\\tools\\initrd.img"",
+                ""KernelCmdLine"": ""earlyprintk=ttyS1 earlycon=uart8250,mmio32,0x68A20000 console=ttyS1 initrd=\\initrd.img panic=-1 pty.legacy_count=0 nr_cpus=2""
+            }" +
+#elif true
+            @"""Uefi"": {
+                ""BootThis"": {
+                    ""DeviceType"": ""VmbFs"",
+                    ""VmbFsRootPath"": ""C:\\WINDOWS\\system32\\lxss\\tools"",
+                    ""DevicePath"": ""\\kernel"",
+                    ""DiskNumber"": 0,
+                    ""OptionalData"": ""earlyprintk=ttyS0 earlycon=uart8250,mmio32,0x68A10000 console=ttyS0 initrd=\\initrd.img panic=-1 pty.legacy_count=0 nr_cpus=2""
+                },
+                ""Console"": ""ComPort1""
             }" +
 #else
             @"""Uefi"": {
                 ""BootThis"": {
                     ""DeviceType"": ""VmbFs"",
                     ""VmbFsRootPath"": ""C:\\WINDOWS\\system32\\lxss\\tools"",
-                    ""DevicePath"": ""\\kernel""," +
-//                    @"""OptionalData"": ""earlycon=pl011,0xeffeb000 console=ttyAMA0 initrd=\\initrd.img panic=-1 pty.legacy_count=0 nr_cpus=2""" +
-                    @"""OptionalData"": ""earlycon=uart8250,mmio32,0x68A10000 console=ttyS0 initrd=\\initrd.img panic=-1 pty.legacy_count=0 nr_cpus=2""" +
-@"                },
-                ""Console"": ""ComPort1""
+                    ""DevicePath"": ""\\kernel"",
+                    ""DiskNumber"": 0,
+                    ""OptionalData"": ""earlyprintk=ttyAMA0 earlycon=pl011,0xeffeb000 console=ttyAMA0 initrd=\\initrd.img panic=-1 pty.legacy_count=0 nr_cpus=2""
+                },
+                ""Console"": ""ComPort2""
             }" +
 #endif
 @"
@@ -426,6 +452,10 @@ namespace ContainerMount
             ""ComPorts"": {
                 ""0"" : {
                     ""NamedPipe"": ""\\\\.\\pipe\\vmpipe"",
+                    ""OptimizeForDebugger"": false
+                },
+                ""1"" : {
+                    ""NamedPipe"": ""\\\\.\\pipe\\vmpipe1"",
                     ""OptimizeForDebugger"": false
                 }
             }
