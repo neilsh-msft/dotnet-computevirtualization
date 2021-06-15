@@ -308,7 +308,8 @@ namespace ContainerMount
                 ""BootThis"": {
                     ""DevicePath"": ""Primary disk"",
                     ""DiskNumber"": 0,
-                    ""DeviceType"": ""ScsiDrive""
+                    ""DeviceType"": ""ScsiDrive"",
+                    ""OptionalData"": """"
                 },
                 ""Console"": ""ComPort1""
             }
@@ -345,13 +346,16 @@ namespace ContainerMount
 @"""
                 }
             },
+            ""VideoMonitor"": {},
+            ""Keyboard"": { },
+            ""Mouse"": { },
             ""ComPorts"": {
                 ""0"" : {
                     ""NamedPipe"": ""\\\\.\\pipe\\vmpipe"",
                     ""OptimizeForDebugger"": false
                 },
                 ""1"" : {
-                    ""NamedPipe"": ""\\\\.\\pipe\\vmpipe1"",
+                    ""NamedPipe"": ""\\\\.\\pipe\\vmpipe2"",
                     ""OptimizeForDebugger"": false
                 }
             }
